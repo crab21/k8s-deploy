@@ -1,0 +1,28 @@
+global:
+  # storageClass: "openebs-jiva-csi-default"
+  storageClass: "openebs-jiva-csi-sc"
+image:
+  debug: true
+# architecture: replication
+architecture: standalone
+auth:
+  rootPassword: pl-mysql
+  replicationUser: replicator
+  replicationPassword: pl-mysql
+primary:
+  service:
+    port: 3306
+  persistence:
+    enabled: true
+    size: 10Gi
+  startupProbe:
+    initialDelaySeconds: 30 # it takes time
+secondary:
+  # replicaCount: 0
+  service:
+    port: 3306
+  persistence:
+    enabled: true
+    size: 10Gi
+  startupProbe:
+    initialDelaySeconds: 90 # wait primary running, so long...

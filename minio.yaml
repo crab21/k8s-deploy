@@ -1,0 +1,17 @@
+global:
+  # storageClass: "openebs-hostpath"
+  storageClass: "openebs-jiva-csi-default"
+mode: distributed
+image:
+  debug: true
+service:
+  ports:
+    api: 80
+    console: 8080
+auth:
+  rootUser: pl-ak # at least 3 chars.
+  rootPassword: pl-operator # at least 8 chars.
+# defaultBuckets: "bucket0,bucket1,bucket2,bucket3"  # only works in standalone
+persistence:
+  enabled: true
+  size: 10Gi

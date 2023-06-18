@@ -1,0 +1,93 @@
+- name: deploy master with kubeadm
+  hosts: masters[0]
+  become: yes
+  vars:
+    # helm_version: 3.9.4
+    # cilium_version: 1.12.1
+    core_dns_timeout: 120s
+  tasks:
+  - name: copy kubeadm init config yaml
+    ansible.builtin.template:
+      src: k8s/kubeadm-init.yaml
+      dest: /root/kubeadm.yaml
+  - name: start kubeadm
+    command: kubeadm init --config=/root/kubeadm.yaml --upload-certs
+    register: kubeadm
+  - debug: msg="{{ kubeadm.stdout }}"
+  - debug: msg="{{ kubeadm.stderr }}"
+
+  - name: shell rc helper
+    shell: |
+      echo 'export KUBECONFIG=/etc/kubernetes/admin.conf' >> ~/.bashrc
+      echo 'alias k=kubectl' >> ~/.bashrc
+  - name: install helm
+    # ansible.builtin.unarchive:
+    #   src: helm/helm.tar.gz
+    #   dest: /usr/local/bin
+    #   extra_opts:
+    #   - linux-{{ arch }}/helm
+    #   - --strip-components
+    #   - "1"
+    ansible.builtin.copy:
+      src: helm/helm
+      dest: /usr/local/bin
+      mode: '0755'
+  - name: upload helm chart tgz
+    ansible.builtin.copy:
+      src: helm/cilium.tgz
+      dest: /tmp
+  - name: install cilium plugin
+    shell: |
+      {% set without_kube_proxy = ( ansible_kernel is version('4.19.57', '>=') and ansible_kernel is version('5.0.0', '<') ) or ( ansible_kernel is version('5.1.16', '>=') and ansible_kernel is version('5.2.0', '<') ) or ansible_kernel is version('5.2.0', '>=') %}
+      export KUBECONFIG=/etc/kubernetes/admin.conf
+      helm --kubeconfig=$KUBECONFIG install cilium /tmp/cilium.tgz \
+        --namespace kube-system \
+        --set operator.replicas=1 \
+      {% if without_kube_proxy %}
+        --set kubeProxyReplacement=strict \
+        --set k8sServiceHost={{ ansible_host }} \
+        --set k8sServicePort=6443 \
+      {% endif %}
+        --set hubble.relay.enabled=true \
+        --set hubble.ui.enabled=true \
+        --set ipam.mode=cluster-pool \
+        --set ipam.operator.clusterPoolIPv4PodCIDR="172.19.0.0/16" \
+        --set ipam.operator.clusterPoolIPv4MaskSize=24 \
+        --set preflight.image.useDigest=false \
+        --set clustermesh.apiserver.image.useDigest=false \
+        --set image.useDigest=false \
+        --set hubble.relay.image.useDigest=false \
+        --set operator.image.useDigest=false \
+        --set hubble.ui.frontend.image.useDigest=false \
+        --set hubble.ui.backend.image.useDigest=false \
+        --set hubble.ui.frontend.image.override=quay.io/cilium/hubble-ui:v0.9.1 \
+        --set hubble.ui.backend.image.override=quay.io/cilium/hubble-ui-backend:v0.9.1
+
+    when: ansible_kernel is version('4.9.17', '>=')
+  - name: upload flannel yaml manifest
+    ansible.builtin.copy:
+      src: misc/kube-flannel.yml
+      dest: /tmp
+    when: ansible_kernel is version('4.9.17', '<')
+  - name: apply flannel yaml
+    shell: |
+      export KUBECONFIG=/etc/kubernetes/admin.conf
+      kubectl apply -f /tmp/kube-flannel.yml
+    when: ansible_kernel is version('4.9.17', '<')
+  - name: check coredns
+    command: kubectl --kubeconfig /etc/kubernetes/admin.conf wait -n kube-system --for=condition=available deployment/coredns --timeout={{ core_dns_timeout }}
+    register: coredns
+  - debug: msg="{{ coredns.stdout }}"
+  # - name: replace kubeconfig with public api-server ip
+  #   shell: |
+  #     cp /etc/kubernetes/admin.conf /tmp/kubeconfig.yaml
+  #     sed -i -e 's/https:\/\/.*:6443/https:\/\/{{ ansible_ssh_host }}:6443/g' /tmp/kubeconfig.yaml
+  - name: copy kube config from remote to local
+    ansible.builtin.fetch:
+      src: /etc/kubernetes/admin.conf
+      dest: out/kubeconfig.yaml
+      flat: yes
+  - name: copy kubeadm output
+    become: false
+    # ansible.builtin.user: "{{ lookup('env', 'USER') }}"
+    local_action: copy content={{ kubeadm.stdout }} dest=out/kubeadm.out

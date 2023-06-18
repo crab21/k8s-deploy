@@ -1,0 +1,35 @@
+- name: apply default storage class
+  hosts: masters[0]
+  vars: {}
+  # connection: local 
+  # user: root
+  become: yes
+  tasks:
+  # - name: Print all available facts
+  # ansible.builtin.debug:
+  # var: ansible_facts
+  # - name: Distribution
+  #   debug: msg="{{ ansible_distribution }}-{{ ansible_host }}"
+  # - name: reset
+  #   ansible.builtin.shell: |
+  #     apt-get update -y
+  #     apt install jq -y
+    - name: Distribution
+      debug: msg="{{ ansible_distribution }}-{{ ansible_host }}"
+
+  # - name: Template a file to /etc/file.conf
+  #   delegate_to: localhost
+  #   become: no
+  #   ansible.builtin.template:
+  #     src: k8s/kubeadm-init.yaml
+  #     dest: /tmp/hi.yaml
+  # ansible.builtin.debug:
+  #   msg="{{ lookup('env', 'USER') }}"
+  # - name: Distribution version
+  #   debug: msg="{{ ansible_distribution_version}}"
+  # - name: Distribution major version
+  #   debug: msg="{{ ansible_distribution_major_version }}"
+  # - name: copy kubeadm init config yaml
+  #   ansible.builtin.template:
+  #     src: k8s/kubeadm-init.yaml
+  #     dest: /tmp/hi.txt

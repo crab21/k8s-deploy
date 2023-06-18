@@ -1,0 +1,89 @@
+- name: deploy containerd
+  hosts: all
+  become: yes
+  vars:
+    bins: [kubeadm, kubelet, kubectl]
+  tasks:
+  - name: enable ip forward
+    ansible.posix.sysctl:
+      name: net.ipv4.ip_forward
+      value: '1'
+      sysctl_set: yes
+      state: present
+      reload: yes
+  - name: setup pre-requirement
+    shell: |
+      cat <<EOF | tee /etc/modules-load.d/containerd.conf
+      overlay
+      br_netfilter
+      EOF
+
+      modprobe overlay
+      modprobe br_netfilter
+
+      # Setup required sysctl params, these persist across reboots.
+      cat <<EOF | tee /etc/sysctl.d/99-kubernetes-cri.conf
+      net.bridge.bridge-nf-call-iptables  = 1
+      net.ipv4.ip_forward                 = 1
+      net.bridge.bridge-nf-call-ip6tables = 1
+      EOF
+
+      # Apply sysctl params without reboot
+      sysctl --system
+  # - name: Upload Release Tarball
+  #   ansible.builtin.copy:
+  #     src: containerd/cri-containerd-cni.tar.gz
+  #     dest: /tmp/cri-containerd-cni.tar.gz
+  - name: Upload Release Tarball
+    ansible.builtin.copy:
+      src: containerd/nerdctl.tar.gz
+      dest: /tmp/nerdctl.tar.gz
+  - name: Upload crictl Release Tarball
+    ansible.builtin.copy:
+      src: containerd/crictl.tar.gz
+      dest: /tmp/crictl.tar.gz
+  - name: Install Containerd
+    # command: tar --no-overwrite-dir -C / -xzf /tmp/cri-containerd-cni.tar.gz
+    ansible.builtin.command: tar zxvf /tmp/nerdctl.tar.gz -C /usr/local
+  - name: Install crictl for kubelet
+    ansible.builtin.command: tar zxvf /tmp/crictl.tar.gz -C /usr/local/bin
+  - name: alias docker to nerdctl
+    ansible.builtin.shell: |
+      # echo 'alias docker=nerdctl' >> /etc/profile
+      cp /usr/local/bin/nerdctl /usr/local/bin/docker
+  # - name: patch static linked runc
+  #   ansible.builtin.copy:
+  #     src: containerd/runc
+  #     dest: /usr/local/sbin/runc
+  - name: Ensures containerd etc dir exists
+    file: path=/etc/containerd state=directory
+  - name: Ensures buildkitd etc dir exists
+    file: path=/etc/buildkit state=directory
+  - name: Copy containerd config
+    ansible.builtin.copy:
+      src: containerd/containerd.toml
+      dest: /etc/containerd/config.toml
+  - name: Copy containerd certs.d
+    ansible.builtin.copy:
+      src: containerd/certs.d
+      dest: /etc/containerd
+  - name: Copy buildkitd config
+    ansible.builtin.copy:
+      src: containerd/buildkitd.toml
+      dest: /etc/buildkit/buildkitd.toml
+  - name: Just force systemd to reread configs (2.4 and above)
+    ansible.builtin.systemd:
+      daemon_reload: yes
+  - name: Make sure a service unit is running
+    ansible.builtin.systemd:
+      state: started
+      name: containerd
+  - name: Make sure a service unit is running
+    ansible.builtin.systemd:
+      state: started
+      name: buildkit
+  - name: Enable service containerd and ensure it is not masked
+    ansible.builtin.systemd:
+      name: containerd
+      enabled: yes
+      masked: no

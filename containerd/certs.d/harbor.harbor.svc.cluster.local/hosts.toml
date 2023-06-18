@@ -1,0 +1,5 @@
+server = "https://harbor.harbor.svc.cluster.local"
+
+[host."https://harbor.harbor.svc.cluster.local"]
+  capabilities = ["pull", "resolve", "push"]
+  skip_verify = true

@@ -1,0 +1,64 @@
+# For full reference: https://kubernetes.io/docs/reference/config-api/kubeadm-config.v1beta3
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: InitConfiguration
+localAPIEndpoint:
+  # advertiseAddress: test.com # the address apiserver will listen on, should not be public ip.
+  # bindPort: 6443
+nodeRegistration:
+  criSocket: unix:///run/containerd/containerd.sock
+  imagePullPolicy: IfNotPresent
+  # name: VM-4-8-debian
+  {%- if (groups['workers'] | length) == 0 +%}
+  # no worker nodes
+  taints: []
+  {%- endif %}
+{% set without_kube_proxy = ( ansible_kernel is version('4.19.57', '>=') and ansible_kernel is version('5.0.0', '<') ) or ( ansible_kernel is version('5.1.16', '>=') and ansible_kernel is version('5.2.0', '<') ) or ansible_kernel is version('5.2.0', '>=') %}
+{%- if without_kube_proxy +%}
+skipPhases: # check kernel https://docs.cilium.io/en/latest/network/kubernetes/kubeproxy-free/
+- addon/kube-proxy
+{%- endif +%}
+---
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: ClusterConfiguration
+apiServer:
+  certSANs:
+  {%- for host in groups['masters'] +%}
+  - {{ host }}
+  {% endfor %}
+
+  # timeoutForControlPlane: 5m0s
+  # extraArgs:
+  #   v: "10"
+{% if ansible_kernel is version('4.9.17', '<') %}
+networking:
+  podSubnet: 10.244.0.0/16 # for flannel
+{% endif %}
+# certificatesDir: /etc/kubernetes/pki
+clusterName: yyds
+{% if control_plane_endpoint is defined and control_plane_endpoint|length %}
+controlPlaneEndpoint: "{{ control_plane_endpoint }}" # shared endpoint for all control-plane nodes, stable IP address or DNS name
+{# {% elif groups['masters']|length > 0 %} #}
+{% else %}
+controlPlaneEndpoint: "{{ ansible_host }}:6443" # shared endpoint for all control-plane nodes, stable IP address or DNS name
+{% endif %}
+# imageRepository: registry.cn-hangzhou.aliyuncs.com/google_containers
+# controllerManager: {}
+# dns: {}
+# etcd:
+#   local:
+#     dataDir: /var/lib/etcd
+kubernetesVersion: {{ k8s_version }}
+# scheduler: {}
+# featureGates: {}
+---
+kind: KubeletConfiguration
+apiVersion: kubelet.config.k8s.io/v1beta1
+cgroupDriver: systemd # default to `systemd`
+featureGates:
+  {%- if k8s_version is version('1.27.0', '>=') +%}
+  NodeLogQuery: true
+  {%- endif +%}
+{%- if k8s_version is version('1.27.0', '>=') +%}
+enableSystemLogHandler: true
+enableSystemLogQuery: true
+{%- endif +%}

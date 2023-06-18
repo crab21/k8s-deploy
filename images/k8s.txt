@@ -1,0 +1,12 @@
+quay.io/cilium/cilium:v1.12.1
+quay.io/cilium/hubble-relay:v1.12.1
+quay.io/cilium/hubble-ui-backend:v0.9.1
+quay.io/cilium/hubble-ui:v0.9.1
+quay.io/cilium/operator-generic:v1.12.1
+registry.k8s.io/kube-apiserver:v1.25.5
+registry.k8s.io/kube-controller-manager:v1.25.5
+registry.k8s.io/kube-scheduler:v1.25.5
+registry.k8s.io/kube-proxy:v1.25.5
+registry.k8s.io/pause:3.8
+registry.k8s.io/etcd:3.5.6-0
+registry.k8s.io/coredns/coredns:v1.9.3

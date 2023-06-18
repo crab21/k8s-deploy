@@ -1,0 +1,13 @@
+ghcr.io/octohelm/harbor/chartmuseum-photon:v2.6.0
+ghcr.io/octohelm/harbor/harbor-core:v2.6.0
+ghcr.io/octohelm/harbor/harbor-db:v2.6.0
+ghcr.io/octohelm/harbor/harbor-exporter-base:v2.6.0
+ghcr.io/octohelm/harbor/harbor-jobservice:v2.6.0
+ghcr.io/octohelm/harbor/nginx-photon:v2.6.0
+ghcr.io/octohelm/harbor/notary-server-photon:v2.6.0
+ghcr.io/octohelm/harbor/notary-signer-photon:v2.6.0
+ghcr.io/octohelm/harbor/harbor-portal:v2.6.0
+ghcr.io/octohelm/harbor/redis-photon:v2.6.0
+ghcr.io/octohelm/harbor/harbor-registryctl:v2.6.0
+ghcr.io/octohelm/harbor/registry-photon:v2.6.0
+ghcr.io/octohelm/harbor/trivy-adapter-photon:v2.6.0

@@ -1,0 +1,39 @@
+# how to choose between oci and containerd worker https://github.com/containerd/nerdctl/blob/main/docs/build.md
+
+[worker.oci]
+  enabled = false
+
+[worker.containerd]
+  enabled = true
+  # namespace should be "k8s.io" for Kubernetes (including Rancher Desktop)
+  # namespace = "default"
+  namespace = "k8s.io"
+
+# registry configures a new Docker register used for cache import or output.
+# [registry."docker.io"]
+#   mirrors = ["yourmirror.local:5000"]
+#   http = true
+#   insecure = true
+#   ca=["/etc/config/myca.pem"]
+#   [[registry."docker.io".keypair]]
+#     key="/etc/config/key.pem"
+#     cert="/etc/config/cert.pem"
+
+# TODO(kennylong): though containerd does have `cert.d`, but buildkit does support it
+[registry."docker.io"]
+  mirrors = ["mirror.ccs.tencentyun.com"] # default to `https`, so specify host is enough
+[registry."gcr.io"]
+  mirrors = ["gcr.tencentcloudcr.com"]
+[registry."ghcr.io"]
+  mirrors = ["ghcr.nju.edu.cn", "ghcr.dockerproxy.com"]
+[registry."quay.io"]
+  mirrors = ["quay.tencentcloudcr.com", "quay.nju.edu.cn"]
+[registry."registry.k8s.io"]
+  mirrors = ["k8s.tencentcloudcr.com", "k8s.dockerproxy.com"]
+[registry."harbor.harbor.svc.cluster.local"]
+  insecure = true
+
+
+# # optionally mirror configuration can be done by defining it as a registry.
+# [registry."yourmirror.local:5000"]
+#   http = true

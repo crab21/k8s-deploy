@@ -1,0 +1,58 @@
+- name: deploy kubeadm
+  hosts: all
+  become: yes
+  tasks:
+  - name: system setup
+    shell: |
+      cat <<EOF | tee /etc/modules-load.d/k8s.conf
+      br_netfilter
+      EOF
+
+      cat <<EOF | tee /etc/sysctl.d/k8s.conf
+      net.bridge.bridge-nf-call-ip6tables = 1
+      net.bridge.bridge-nf-call-iptables = 1
+      EOF
+
+      sudo sysctl --system
+  - name: Upload kubeadm
+    ansible.builtin.copy:
+      src: k8s/kubeadm
+      dest: /usr/local/bin
+      mode: '0755'
+  - name: Upload kubelet
+    ansible.builtin.copy:
+      src: k8s/kubelet
+      dest: /usr/local/bin
+      mode: '0755'
+  - name: Upload kubectl
+    ansible.builtin.copy:
+      src: k8s/kubectl
+      dest: /usr/local/bin
+      mode: '0755'
+  - name: Upload kubelet.service
+    ansible.builtin.copy:
+      src: k8s/kubelet.service
+      dest: /etc/systemd/system
+      mode: '0644'
+  - name: Ensures kubelet service dir exists
+    file: path=/etc/systemd/system/kubelet.service.d state=directory
+  - name: Upload kubelet.service.d files
+    ansible.builtin.template:
+      src: "{{ item.src }}"
+      dest: /etc/systemd/system/kubelet.service.d
+      mode: '0751'
+    loop:
+    - src: 'k8s/kubelet.service.d/0-containerd.conf'
+    - src: 'k8s/kubelet.service.d/10-kubeadm.conf'
+  - name: Just force systemd to reread configs (2.4 and above)
+    ansible.builtin.systemd:
+      daemon_reload: yes
+  - name: Make sure a service unit is running
+    ansible.builtin.systemd:
+      state: started
+      name: kubelet
+  - name: Enable service kubelet and ensure it is not masked
+    ansible.builtin.systemd:
+      name: kubelet
+      enabled: yes
+      masked: no

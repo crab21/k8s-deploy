@@ -1,0 +1,7 @@
+image:
+  debug: true
+global:
+  # storageClass: "openebs-jiva-csi-default"
+  storageClass: "openebs-jiva-csi-sc"
+rootUser:
+  password: pl-mysql

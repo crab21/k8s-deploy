@@ -1,0 +1,31 @@
+- name: install openebs dependencies
+  hosts: workers
+  become: yes
+  vars: {}
+  tasks:
+  - name: install open iscsi
+    ansible.builtin.shell: |
+      apt install open-iscsi -y
+      systemctl enable --now iscsid
+      modprobe iscsi_tcp
+      echo iscsi_tcp >/etc/modules-load.d/iscsi-tcp.conf
+    when: (groups["workers"] | length) > 0
+  - name: Make sure iscsid unit is running
+    ansible.builtin.systemd:
+      state: started
+      name: iscsid
+
+- name: install openebs as the storage class 
+  hosts: masters[0]
+  become: yes
+  tasks:
+  - name: upload openebs helm chart
+    ansible.builtin.copy:
+      src: misc/openebs.tar.gz
+      dest: /tmp
+  - name: install default storage class
+    ansible.builtin.shell: |-
+      export KUBECONFIG=/etc/kubernetes/admin.conf
+      {% set use_jiva = (groups['workers'] | length) > 0 %}
+      helm install openebs --namespace openebs /tmp/openebs.tar.gz --create-namespace {% if use_jiva %} --set jiva.enabled=true{% endif +%}
+      kubectl patch storageclass {% if use_jiva %}openebs-jiva-csi-default{% else %}openebs-hostpath{% endif %} -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'

@@ -1,0 +1,10 @@
+server = "https://registry.k8s.io"
+
+[host."https://k8s.tencentcloudcr.com"]
+  capabilities = ["pull", "resolve"]
+[host."https://k8s.gcr.io"]
+  capabilities = ["pull", "resolve"]
+[host."https://k8s.dockerproxy.com"]
+  capabilities = ["pull", "resolve"]
+# [host."https://gcr.nju.edu.cn/google-containers"]
+#   capabilities = ["pull", "resolve"]

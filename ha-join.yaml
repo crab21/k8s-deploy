@@ -1,0 +1,39 @@
+- name: join control-planes
+  hosts: masters,!masters[0]
+  become: yes
+  vars: {}
+  tasks:
+  - name: resolve kubeadm output
+    ansible.builtin.command: cat out/kubeadm.out
+    register: kubeadm
+    delegate_to: 127.0.0.1
+    become: no
+  - set_fact:
+      control_plane: "{{ kubeadm.stdout | regex_search('kubeadm join .+\\n.+\\n\\s*--control-plane.*') }}"
+  - debug:
+      var: control_plane
+  - name: join control-planes
+    shell: '{{ control_plane }}'
+    register: join
+  - debug: msg="{{ join.stdout }}"
+  - debug: msg="{{ join.stderr }}"
+
+- name: join workers
+  hosts: workers
+  become: yes
+  vars: {}
+  tasks:
+  - name: resolve kubeadm output
+    ansible.builtin.command: cat out/kubeadm.out
+    register: kubeadm
+    become: no
+    delegate_to: 127.0.0.1
+  - set_fact:
+      workers: "{{ kubeadm.stdout | regex_search('kubeadm join .*\\n.*$') }}"
+  - debug:
+      var: workers
+  - name: join
+    shell: '{{ workers }}'
+    register: join
+  - debug: msg="{{ join.stdout }}"
+  - debug: msg="{{ join.stderr }}"

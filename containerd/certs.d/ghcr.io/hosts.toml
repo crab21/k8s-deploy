@@ -1,0 +1,6 @@
+server = "https://ghcr.io"
+
+[host."https://ghcr.nju.edu.cn"]
+  capabilities = ["pull", "resolve"]
+[host."https://ghcr.dockerproxy.com"]
+  capabilities = ["pull", "resolve"]

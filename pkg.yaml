@@ -1,0 +1,40 @@
+- name: install required system dependencies
+  hosts: all
+  become: yes
+  tasks:
+  - name: Upload apt.tar.bz2
+    ansible.builtin.copy:
+      src: misc/apt.tar.bz2
+      dest: /tmp
+    when: ansible_distribution == 'Debian' and ansible_distribution_major_version is version('11', '==')
+  - name: install soft with apt offline
+    shell: |
+      mkdir -p /tmp/apt
+      tar jxvf /tmp/apt.tar.bz2 -C /tmp/apt
+      mv /etc/apt/sources.list /etc/apt/sources.list.bak
+      echo "deb [trusted=yes] file:///tmp/apt/ archives/" > /etc/apt/sources.list
+      apt update && apt install -y socat conntrack iptables
+      mv /etc/apt/sources.list.bak /etc/apt/sources.list
+    when: ansible_distribution == 'Debian' and ansible_distribution_major_version is version('11', '==')
+  - name: install soft with apt online
+    ansible.builtin.apt:
+      update_cache: yes
+      pkg:
+      - socat
+      - conntrack
+      - iptables
+    when: (ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu') and ansible_distribution_major_version is version('11', '!=')
+  - name: install soft with dnf online
+    ansible.builtin.dnf:
+      name:
+      - socat
+      - conntrack
+      - iptables
+    when: (ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux') and (ansible_distribution_major_version is version('8', '==') or ansible_distribution_major_version is version('9', '=='))
+  - name: install soft with yum online
+    ansible.builtin.yum:
+      name:
+      - socat
+      - conntrack
+      - iptables
+    when: (ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux') and (ansible_distribution_major_version is version('7', '==') or ansible_distribution_major_version is version('2', '=='))

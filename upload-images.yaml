@@ -1,0 +1,13 @@
+- name: prepare k8s oci offline images
+  hosts: all
+  become: yes
+  tasks:
+  - name: copy k8s oci images
+    ansible.builtin.copy:
+      src: images
+      dest: /tmp/k8s-yyds
+      mode: '0644'
+  - name: import images script
+    shell: |
+      cd /tmp/k8s-yyds/images
+      bash import.sh

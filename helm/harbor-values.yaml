@@ -1,0 +1,64 @@
+# based on: https://raw.githubusercontent.com/goharbor/harbor-helm/master/values.yaml
+chartmuseum:
+  image:
+    repository: ghcr.io/octohelm/harbor/chartmuseum-photon
+    tag: v2.6.0
+core:
+  image:
+    repository: ghcr.io/octohelm/harbor/harbor-core
+    tag: v2.6.0
+database:
+  internal:
+    image:
+      repository: ghcr.io/octohelm/harbor/harbor-db
+      tag: v2.6.0
+exporter:
+  image:
+    repository: ghcr.io/octohelm/harbor/harbor-exporter-base
+    tag: v2.6.0
+expose:
+  tls:
+    auto:
+      commonName: harbor.harbor.svc.cluster.local
+  type: clusterIP
+externalURL: https://harbor.harbor.svc.cluster.local
+harborAdminPassword: k8s-yyds
+jobservice:
+  image:
+    repository: ghcr.io/octohelm/harbor/harbor-jobservice
+    tag: v2.6.0
+nginx:
+  image:
+    repository: ghcr.io/octohelm/harbor/nginx-photon
+    tag: v2.6.0
+notary:
+  server:
+    image:
+      repository: ghcr.io/octohelm/harbor/notary-server-photon
+      tag: v2.6.0
+  signer:
+    image:
+      repository: ghcr.io/octohelm/harbor/notary-signer-photon
+      tag: v2.6.0
+portal:
+  image:
+    repository: ghcr.io/octohelm/harbor/harbor-portal
+    tag: v2.6.0
+redis:
+  internal:
+    image:
+      repository: ghcr.io/octohelm/harbor/redis-photon
+      tag: v2.6.0
+registry:
+  controller:
+    image:
+      repository: ghcr.io/octohelm/harbor/harbor-registryctl
+      tag: v2.6.0
+  registry:
+    image:
+      repository: ghcr.io/octohelm/harbor/registry-photon
+      tag: v2.6.0
+trivy:
+  image:
+    repository: ghcr.io/octohelm/harbor/trivy-adapter-photon
+    tag: v2.6.0

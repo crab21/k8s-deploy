@@ -1,0 +1,14 @@
+- name: apply default storage class
+  hosts: mlasters[0]
+  become: yes
+  vars: {}
+  tasks:
+  - name: upload k8s manifest
+    ansible.builtin.template:
+      src: misc/local-path-storage.yaml
+      dest: /tmp
+  - name: install default storage class
+    shell: |-
+      export KUBECONFIG=/etc/kubernetes/admin.conf
+      kubectl apply -f /tmp/local-path-storage.yaml
+      kubectl patch storageclass local-path -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'

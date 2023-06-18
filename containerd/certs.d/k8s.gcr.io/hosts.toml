@@ -1,0 +1,6 @@
+server = "https://k8s.gcr.io"
+
+[host."https://k8s.tencentcloudcr.com"]
+  capabilities = ["pull", "resolve"]
+# [host."https://gcr.nju.edu.cn/google-containers"]
+#   capabilities = ["pull", "resolve"]

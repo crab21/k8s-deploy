@@ -1,0 +1,3 @@
+k8s_version: 1.27.2
+local_path_provisioner_dir: /opt/local-path-provisioner
+# control_plane_endpoint: "101.33.240.240:6443" # shared endpoint for all control-plane nodes, stable IP address or DNS name

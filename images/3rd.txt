@@ -1,0 +1,4 @@
+docker.io/library/busybox:1.31
+docker.io/rancher/local-path-provisioner:v0.0.22
+docker.io/rancher/mirrored-flannelcni-flannel-cni-plugin:v1.1.0
+docker.io/rancher/mirrored-flannelcni-flannel:v0.19.2

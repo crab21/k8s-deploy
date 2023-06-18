@@ -1,0 +1,6 @@
+server = "https://gcr.io"
+
+[host."https://gcr.tencentcloudcr.com"]
+  capabilities = ["pull", "resolve"]
+[host."https://gcr.nju.edu.cn"]
+  capabilities = ["pull", "resolve"]

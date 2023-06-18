@@ -1,0 +1,43 @@
+- name: deploy harbor with helm
+  hosts: masters[0]
+  become: yes
+  vars:
+    enabled: true
+    # harbor_version: 1.10.1 # harbor chart version
+    external_url: harbor.harbor.svc.cluster.local # FIXME: don't change it right now!
+    harbor_admin_pass: r7tbCrBMawRQrY
+    service_type: NodePort 
+  tasks:
+  - name: upload k8s manifest
+    ansible.builtin.copy:
+      src: helm/harbor.tgz
+      dest: /tmp
+    when: enabled == true
+  - name: upload harbor values
+    ansible.builtin.copy:
+      src: helm/harbor-values.yaml
+      dest: /tmp
+    when: enabled == true
+  - name: install harbor with helm
+    shell: |-
+      export KUBECONFIG=/etc/kubernetes/admin.conf
+      # helm --kubeconfig=$KUBECONFIG install harbor --create-namespace /tmp/harbor.tgz \
+      #   --namespace harbor \
+      #   --set externalURL={{ external_url }} \
+      #   --set nginx.tls.enabled=true \
+      #   --set nginx.tls.commonName={{ external_url }} \
+      #   {% if harbor_admin_pass %}
+      #   --set adminPassword={{ harbor_admin_pass }} \
+      #   {% endif %}
+      #   --set service.type={{ service_type }}
+      helm --kubeconfig=$KUBECONFIG install harbor --create-namespace /tmp/harbor.tgz \
+        --namespace harbor \
+        -f /tmp/harbor-values.yaml
+    when: enabled == true
+  # TODO: modify /etc/hosts with ansible!
+  - name: update /etc/host
+    shell: |-
+      export KUBECONFIG=/etc/kubernetes/admin.conf
+      IP=$(kubectl get svc -n harbor harbor -ojsonpath='{ .spec.clusterIP }')
+      echo "$IP {{ external_url }}" >> /etc/hosts
+    when: enabled == true
