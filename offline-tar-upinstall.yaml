@@ -1,0 +1,27 @@
+- name: generate local ssh private key
+  hosts: 127.0.0.1
+  become: yes
+  connection: local
+  ignore_errors: false
+  tasks:
+    - name: save
+      shell: |
+        docker save -o k8spacket.tar docker.io/k8spacket/k8spacket:1.1.1
+
+- name: upload offline PKG
+  hosts: all
+  become: yes
+  tasks:
+  - name: Upload k8s offline tar
+    ansible.builtin.copy:
+      src: k8spacket.tar
+      dest: /root/k8spacket.tar
+      mode: '0644'
+  - name: system setup
+    shell: |
+      ctr -n k8s.io i import  /root/k8spacket.tar --debug
+      rm -rf /root/k8spacket.tar
+      sleep 20
+  # - name: sleep 20 
+  #   shell: |
+  #     sleep 20

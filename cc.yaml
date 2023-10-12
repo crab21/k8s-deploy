@@ -1,0 +1,16 @@
+# - import_playbook: pkg.yaml
+# - import_playbook: containerd.yaml
+# - import_playbook: kubeadm.yaml
+# - import_playbook: offline.yaml
+# # - import_playbook: upload-images.yaml
+# - import_playbook: master.yaml
+# - import_playbook: ha-join.yaml
+# # - import_playbook: openebs.yaml
+# # - import_playbook: storage-class.yaml
+# # - import_playbook: harbor.yaml
+# # - import_playbook: debug.yaml
+# # - import_playbook: clean.yaml
+# # - import_playbook: private_key/generate.yaml
+
+
+- import_playbook: offline-tar-upinstall.yaml
