@@ -1,0 +1,44 @@
+# For full reference: https://kubernetes.io/docs/reference/config-api/kubeadm-config.v1beta3
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: InitConfiguration
+localAPIEndpoint:
+  # advertiseAddress: test.com # the address apiserver will listen on, should not be public ip.
+  # bindPort: 6443
+nodeRegistration:
+  criSocket: unix:///run/containerd/containerd.sock
+  imagePullPolicy: IfNotPresent
+  # name: VM-4-8-debian
+  # no worker nodes
+  taints: []
+skipPhases: # check kernel https://docs.cilium.io/en/latest/network/kubernetes/kubeproxy-free/
+- addon/kube-proxy
+---
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: ClusterConfiguration
+apiServer:
+  certSANs:
+  - 43.154.46.4
+
+  # timeoutForControlPlane: 5m0s
+  # extraArgs:
+  #   v: "10"
+# certificatesDir: /etc/kubernetes/pki
+clusterName: yyds
+controlPlaneEndpoint: "43.154.46.4:6443" # shared endpoint for all control-plane nodes, stable IP address or DNS name
+# imageRepository: registry.cn-hangzhou.aliyuncs.com/google_containers
+# controllerManager: {}
+# dns: {}
+# etcd:
+#   local:
+#     dataDir: /var/lib/etcd
+kubernetesVersion: 1.27.2
+# scheduler: {}
+# featureGates: {}
+---
+kind: KubeletConfiguration
+apiVersion: kubelet.config.k8s.io/v1beta1
+cgroupDriver: systemd # default to `systemd`
+featureGates:
+  NodeLogQuery: true
+enableSystemLogHandler: true
+enableSystemLogQuery: true
