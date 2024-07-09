@@ -21,13 +21,14 @@ set -o pipefail
 KUBE_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
 export arch=${arch:=amd64}
-k8s_version=1.27.2
-nerdctl_version=1.3.0
-cri_tools_version=1.26.1
-helm_version=3.11.2
+k8s_version=1.30.2
+nerdctl_version=1.7.6
+cri_tools_version=1.30.0
+helm_version=3.15.2
 harbor_version=1.11.1
-cilium_version=1.13.3
+cilium_version=1.15.6
 openebs_version=3.5.0
+containerd_version=1.7.19
 
 echo "======== downloading all the artifacts with linux/${arch} platform..."
 
@@ -50,7 +51,7 @@ function dldd(){
 
 }
 
-dldd containerd cri-containerd-cni.tar.gz https://github.com/containerd/containerd/releases/download/v1.6.8/cri-containerd-cni-1.6.8-linux-${arch}.tar.gz
+dldd containerd cri-containerd-cni.tar.gz https://github.com/containerd/containerd/releases/download/v${containerd_version}/cri-containerd-cni-${containerd_version}-linux-${arch}.tar.gz
 dldd containerd nerdctl.tar.gz  https://github.com/containerd/nerdctl/releases/download/v${nerdctl_version}/nerdctl-full-${nerdctl_version}-linux-${arch}.tar.gz
 
 
@@ -70,4 +71,4 @@ dldd misc kube-flannel.yml https://raw.githubusercontent.com/flannel-io/flannel/
 dldd misc local-path-storage.yaml https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.22/deploy/local-path-storage.yaml
 
 # dldd misc openebs.tar.gz https://github.com/openebs/charts/releases/download/openebs-${openebs_version}/openebs-${openebs_version}.tgz
-# dldd containerd runc https://github.com/opencontainers/runc/releases/download/v1.1.4/runc.${arch}
+dldd containerd runc https://github.com/opencontainers/runc/releases/download/v1.1.4/runc.${arch}

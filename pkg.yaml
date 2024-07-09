@@ -1,9 +1,11 @@
+# https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_vars_facts.html
 - name: install required system dependencies
   hosts: all
   become: yes
   tasks:
   - name: Upload apt.tar.bz2
-    ansible.builtin.copy:
+    ansible.posix.synchronize:
+      recursive: true
       src: misc/apt.tar.bz2
       dest: /tmp
     when: ansible_distribution == 'Debian' and ansible_distribution_major_version is version('11', '==')
@@ -20,6 +22,7 @@
     ansible.builtin.apt:
       update_cache: yes
       pkg:
+      - rsync
       - socat
       - conntrack
       - iptables
@@ -27,6 +30,7 @@
   - name: install soft with dnf online
     ansible.builtin.dnf:
       name:
+      - rsync
       - socat
       - conntrack
       - iptables
@@ -34,6 +38,7 @@
   - name: install soft with yum online
     ansible.builtin.yum:
       name:
+      - rsync
       - socat
       - conntrack
       - iptables

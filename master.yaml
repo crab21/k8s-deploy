@@ -28,12 +28,16 @@
     #   - linux-{{ arch }}/helm
     #   - --strip-components
     #   - "1"
-    ansible.builtin.copy:
+    ansible.posix.synchronize:
+      recursive: true
       src: helm/helm
       dest: /usr/local/bin
-      mode: '0755'
+  - name: add permission for bin
+    shell: |
+      chmod -R 0755 /usr/local/bin
   - name: upload helm chart tgz
-    ansible.builtin.copy:
+    ansible.posix.synchronize:
+      recursive: true
       src: helm/cilium.tgz
       dest: /tmp
   - name: install cilium plugin
@@ -51,7 +55,7 @@
         --set hubble.relay.enabled=true \
         --set hubble.ui.enabled=true \
         --set ipam.mode=cluster-pool \
-        --set ipam.operator.clusterPoolIPv4PodCIDR="172.19.0.0/16" \
+        --set ipam.operator.clusterPoolIPv4PodCIDRList[0]="172.19.0.0/16" \
         --set ipam.operator.clusterPoolIPv4MaskSize=24 \
         --set preflight.image.useDigest=false \
         --set clustermesh.apiserver.image.useDigest=false \
@@ -65,7 +69,8 @@
 
     when: ansible_kernel is version('4.9.17', '>=')
   - name: upload flannel yaml manifest
-    ansible.builtin.copy:
+    ansible.posix.synchronize:
+      recursive: true
       src: misc/kube-flannel.yml
       dest: /tmp
     when: ansible_kernel is version('4.9.17', '<')

@@ -1,7 +1,7 @@
 - import_playbook: pkg.yaml
 - import_playbook: containerd.yaml
 - import_playbook: kubeadm.yaml
-- import_playbook: offline.yaml
+# - import_playbook: offline.yaml
 # - import_playbook: upload-images.yaml
 - import_playbook: master.yaml
 - import_playbook: ha-join.yaml

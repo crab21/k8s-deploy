@@ -31,7 +31,7 @@ controlPlaneEndpoint: "43.154.46.4:6443" # shared endpoint for all control-plane
 # etcd:
 #   local:
 #     dataDir: /var/lib/etcd
-kubernetesVersion: 1.27.2
+kubernetesVersion: 1.30.2
 # scheduler: {}
 # featureGates: {}
 ---

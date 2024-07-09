@@ -13,7 +13,8 @@
   become: yes
   tasks:
   - name: Upload k8s offline tar
-    ansible.builtin.copy:
+    ansible.posix.synchronize:
+      recursive: true
       src: k8spacket.tar
       dest: /root/k8spacket.tar
       mode: '0644'

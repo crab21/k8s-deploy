@@ -20,7 +20,8 @@
   become: yes
   tasks:
   - name: upload openebs helm chart
-    ansible.builtin.copy:
+    ansible.posix.synchronize:
+      recursive: true
       src: misc/openebs.tar.gz
       dest: /tmp
   - name: install default storage class

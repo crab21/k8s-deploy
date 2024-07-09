@@ -3,14 +3,15 @@
   become: yes
   tasks:
   - name: Upload k8s offline tar
-    ansible.builtin.copy:
-      src: images/k8s-1.27.2.tar
-      dest: /root/k8s-1.27.2.tar
+    ansible.posix.synchronize:
+      recursive: true
+      src: images/k8s-1.30.2.tar
+      dest: /root/k8s-1.30.2.tar
       mode: '0644'
   - name: system setup
     shell: |
-      ctr -n k8s.io i import  /root/k8s-1.27.2.tar --debug
-      rm -rf /root/k8s-1.27.2.tar
+      ctr -n k8s.io i import  /root/k8s-1.30.2.tar --debug
+      rm -rf /root/k8s-1.30.2.tar
       sleep 20
   # - name: sleep 20 
   #   shell: |

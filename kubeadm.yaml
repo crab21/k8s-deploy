@@ -15,35 +15,39 @@
 
       sudo sysctl --system
   - name: Upload kubeadm
-    ansible.builtin.copy:
+    ansible.posix.synchronize:
+      recursive: true
       src: k8s/kubeadm
       dest: /usr/local/bin
-      mode: '0755'
   - name: Upload kubelet
-    ansible.builtin.copy:
+    ansible.posix.synchronize:
+      recursive: true
       src: k8s/kubelet
       dest: /usr/local/bin
-      mode: '0755'
   - name: Upload kubectl
-    ansible.builtin.copy:
+    ansible.posix.synchronize:
+      recursive: true
       src: k8s/kubectl
       dest: /usr/local/bin
-      mode: '0755'
   - name: Upload kubelet.service
-    ansible.builtin.copy:
+    ansible.posix.synchronize:
+      recursive: true
       src: k8s/kubelet.service
       dest: /etc/systemd/system
-      mode: '0644'
   - name: Ensures kubelet service dir exists
     file: path=/etc/systemd/system/kubelet.service.d state=directory
   - name: Upload kubelet.service.d files
     ansible.builtin.template:
       src: "{{ item.src }}"
       dest: /etc/systemd/system/kubelet.service.d
-      mode: '0751'
     loop:
     - src: 'k8s/kubelet.service.d/0-containerd.conf'
     - src: 'k8s/kubelet.service.d/10-kubeadm.conf'
+  - name: add permission for bin
+    shell: |
+      chmod 0751 /etc/systemd/system/kubelet.service.d
+      chmod -R 0644 /etc/systemd/system
+      chmod -R 0755 /usr/local/bin
   - name: Just force systemd to reread configs (2.4 and above)
     ansible.builtin.systemd:
       daemon_reload: yes

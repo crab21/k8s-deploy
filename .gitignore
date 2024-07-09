@@ -2,3 +2,4 @@
 images/*.tar
 private_key/id_ssh_*
 out/**
+/*.log

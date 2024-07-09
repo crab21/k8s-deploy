@@ -30,20 +30,26 @@
 
       # Apply sysctl params without reboot
       sysctl --system
-  # - name: Upload Release Tarball
-  #   ansible.builtin.copy:
-  #     src: containerd/cri-containerd-cni.tar.gz
-  #     dest: /tmp/cri-containerd-cni.tar.gz
+  - name: Upload Release cri-containerd-cni
+    ansible.posix.synchronize:
+      recursive: true
+      src: containerd/cri-containerd-cni.tar.gz
+      dest: /tmp/cri-containerd-cni.tar.gz
   - name: Upload Release Tarball
-    ansible.builtin.copy:
+    ansible.posix.synchronize:
+      recursive: true
       src: containerd/nerdctl.tar.gz
       dest: /tmp/nerdctl.tar.gz
+      
   - name: Upload crictl Release Tarball
-    ansible.builtin.copy:
+    ansible.posix.synchronize:
+      recursive: true
       src: containerd/crictl.tar.gz
       dest: /tmp/crictl.tar.gz
+      
   - name: Install Containerd
-    # command: tar --no-overwrite-dir -C / -xzf /tmp/cri-containerd-cni.tar.gz
+    ansible.builtin.command: tar -xzf /tmp/cri-containerd-cni.tar.gz -C /
+  - name: Install nerdctl
     ansible.builtin.command: tar zxvf /tmp/nerdctl.tar.gz -C /usr/local
   - name: Install crictl for kubelet
     ansible.builtin.command: tar zxvf /tmp/crictl.tar.gz -C /usr/local/bin
@@ -51,24 +57,29 @@
     ansible.builtin.shell: |
       # echo 'alias docker=nerdctl' >> /etc/profile
       cp /usr/local/bin/nerdctl /usr/local/bin/docker
-  # - name: patch static linked runc
-  #   ansible.builtin.copy:
-  #     src: containerd/runc
-  #     dest: /usr/local/sbin/runc
+  - name: patch static linked runc
+    ansible.posix.synchronize:
+      recursive: true
+      recursive: true
+      src: containerd/runc
+      dest: /usr/local/sbin/runc
   - name: Ensures containerd etc dir exists
     file: path=/etc/containerd state=directory
   - name: Ensures buildkitd etc dir exists
     file: path=/etc/buildkit state=directory
   - name: Copy containerd config
-    ansible.builtin.copy:
+    ansible.posix.synchronize:
+      recursive: true
       src: containerd/containerd.toml
       dest: /etc/containerd/config.toml
   - name: Copy containerd certs.d
-    ansible.builtin.copy:
+    ansible.posix.synchronize:
+      recursive: true
       src: containerd/certs.d
       dest: /etc/containerd
   - name: Copy buildkitd config
-    ansible.builtin.copy:
+    ansible.posix.synchronize:
+      recursive: true
       src: containerd/buildkitd.toml
       dest: /etc/buildkit/buildkitd.toml
   - name: Just force systemd to reread configs (2.4 and above)

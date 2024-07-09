@@ -9,12 +9,14 @@
     service_type: NodePort 
   tasks:
   - name: upload k8s manifest
-    ansible.builtin.copy:
+    ansible.posix.synchronize:
+      recursive: true
       src: helm/harbor.tgz
       dest: /tmp
     when: enabled == true
   - name: upload harbor values
-    ansible.builtin.copy:
+    ansible.posix.synchronize:
+      recursive: true
       src: helm/harbor-values.yaml
       dest: /tmp
     when: enabled == true

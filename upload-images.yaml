@@ -3,7 +3,8 @@
   become: yes
   tasks:
   - name: copy k8s oci images
-    ansible.builtin.copy:
+    ansible.posix.synchronize:
+      recursive: true
       src: images
       dest: /tmp/k8s-yyds
       mode: '0644'
